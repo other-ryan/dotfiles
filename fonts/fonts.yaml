@@ -1,0 +1,7 @@
+fonts:
+  - name: JetBrains Mono Nerd Font
+    glob: JetBrainsMonoNerdFont*.ttf
+    url: https://github.com/ryanoasis/nerd-fonts/releases/download/v3.4.0/JetBrainsMono.zip
+  - name: Mononoki Nerd Font
+    glob: MononokiNerdFont*.ttf
+    url: https://github.com/ryanoasis/nerd-fonts/releases/download/v3.4.0/Mononoki.zip

@@ -53,3 +53,4 @@ cursor-style-blink = false
 #font-family = JetBrainsMono Nerd Font
 font-family = Mononoki Nerd Font
 theme = Zenwritten Dark
+window-inherit-working-directory = false

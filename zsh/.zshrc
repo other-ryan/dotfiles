@@ -7,7 +7,9 @@ zstyle ':antidote:bundle' use-friendly-names 'yes'
 ## 💾 prompt
 export POWERLEVEL9K_DISABLE_CONFIGURATION_WIZARD=true # use `p10k configure` to run the wizard
 typeset -g ZSH_PROMPT_USE=starship
+typeset -g ZSH_PROMPT_THEME=starship
 zstyle -s ':rm:zsh:zephyr:prompt' use ZSH_PROMPT_USE
+zstyle -s ':rm:zsh:zephyr:prompt' theme ZSH_PROMPT_THEME
 
 zstyle ':zephyr:plugin:prompt' use-cache yes
 
@@ -17,7 +19,7 @@ if [[ ${ZSH_PROMPT_USE} == starship ]]; then
   # print (${VENV_NAME}) at every prompt
   export VIRTUAL_ENV_DISABLE_PROMPT=1
   export STARSHIP_LOG=error
-  zstyle ':zephyr:plugin:prompt' theme starship
+  zstyle ':zephyr:plugin:prompt' theme starship ${ZSH_PROMPT_THEME}
 fi
 # 🚀 end
 

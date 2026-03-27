@@ -7,5 +7,3 @@ zsh-users/zsh-completions kind:fpath path:src
 ohmyzsh/ohmyzsh path:lib
 zsh-users/zsh-autosuggestions
 zdharma-continuum/fast-syntax-highlighting
-
-romkatv/powerlevel10k

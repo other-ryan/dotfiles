@@ -50,7 +50,10 @@
 shell-integration-features = no-cursor
 cursor-style = block
 cursor-style-blink = false
-#font-family = JetBrainsMono Nerd Font
 font-family = Mononoki Nerd Font
 theme = Zenwritten Dark
 window-inherit-working-directory = false
+
+# use config-local (relative to this file) to add additional
+# machine-specific settings
+config-file = ?config-local

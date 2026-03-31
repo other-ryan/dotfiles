@@ -1,6 +1,6 @@
 # source pre configs
-if [[ -f "${HOME}/.zsh_pre" ]]; then
-    source "${HOME}/.zsh_pre"
+if [[ -f "${HOME}/.pre.zsh" ]]; then
+    source "${HOME}/.pre.zsh"
 fi
 
 # source main configs
@@ -11,6 +11,6 @@ if [[ -d "${ZDOTDIR}/conf.d" ]]; then
 fi
 
 # source post configs
-if [[ -f "${HOME}/.zsh_post" ]]; then
-    source "${HOME}/.zsh_post"
+if [[ -f "${HOME}/.post.zsh" ]]; then
+    source "${HOME}/.post.zsh"
 fi

@@ -1,11 +1,4 @@
-# 🍺 brew
-export PATH=/opt/homebrew/bin:/opt/homebrew/sbin:${PATH}
-
-### 🧪 antidote setup
-zstyle ':antidote:bundle' use-friendly-names 'yes'
-
-## 💾 prompt
-export POWERLEVEL9K_DISABLE_CONFIGURATION_WIZARD=true # use `p10k configure` to run the wizard
+# 💾 prompt configs
 typeset -g ZSH_PROMPT_USE=starship
 typeset -g ZSH_PROMPT_THEME=starship
 zstyle -s ':rm:zsh:zephyr:prompt' use ZSH_PROMPT_USE
@@ -19,22 +12,7 @@ if [[ ${ZSH_PROMPT_USE} == starship ]]; then
   # print (${VENV_NAME}) at every prompt
   export VIRTUAL_ENV_DISABLE_PROMPT=1
   export STARSHIP_LOG=error
+  export _ZSH_THEME=$ZSH_PROMPT_THEME
   zstyle ':zephyr:plugin:prompt' theme starship ${ZSH_PROMPT_THEME}
 fi
 # 🚀 end
-
-# 🔋 p10k
-if [[ ${ZSH_PROMPT_USE} == p10k ]]; then
-  zstyle ':zephyr:plugin:prompt' theme p10k rm
-fi
-# 🔋 end
-## 💾 end
-
-source "${HOME}/.config/antidote/antidote.zsh"
-antidote load
-### 🧪 end
-
-# 📜 histr setup
-export HISTFILE=~/.zsh_history
-SAVEHIST=500000
-HISTSIZE=500000

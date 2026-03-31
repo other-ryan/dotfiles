@@ -1,14 +1,27 @@
-#!/usr/bin/env bash
+#!/usr/bin/env zsh
 
 set -euo pipefail
 
-BOOTSTRAP_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+BOOTSTRAP_DIR="${0:A:h}"
+STOW_ONLY=0
+typeset -a STOW_PACKAGES=(zsh ghostty)
 
-RUN_PREFS=1
-RUN_TOOLS=1
-RUN_FONTS=1
-RUN_ZSH=1
-RUN_GHOSTTY=1
+log_step() {
+  print -P "%F{cyan}==>%f $*"
+}
+
+log_warn() {
+  print -P "%F{yellow}warning:%f $*" >&2
+}
+
+log_error() {
+  print -P "%F{red}error:%f $*" >&2
+}
+
+die() {
+  log_error "$1"
+  exit 1
+}
 
 timestamp() {
   date +"%Y%m%d%H%M%S"
@@ -19,22 +32,15 @@ usage() {
 Usage: ./bootstrap.sh [options]
 
 Options:
-  --only <steps>   Run only the listed steps. Comma-separated.
-  --skip <steps>   Skip the listed steps. Comma-separated.
-  --help           Show this help text.
-
-Steps:
-  prefs
-  tools
-  fonts
-  zsh
-  ghostty
+  --stow-only             Run only the stow placement step.
+  --packages <packages>   Comma-separated stow packages to process.
+  --help                  Show this help text.
 
 Examples:
   ./bootstrap.sh
-  ./bootstrap.sh --only tools
-  ./bootstrap.sh --only fonts,ghostty
-  ./bootstrap.sh --skip fonts
+  ./bootstrap.sh --stow-only
+  ./bootstrap.sh --packages zsh
+  ./bootstrap.sh --stow-only --packages zsh,ghostty
 EOF
 }
 
@@ -42,29 +48,8 @@ backup_path() {
   local path="$1"
   local backup="${path}.bak.$(timestamp)"
 
+  log_warn "Backing up $path to $backup"
   mv "$path" "$backup"
-}
-
-ensure_symlink() {
-  local target_path="$1"
-  local source_path="$2"
-
-  if [[ -L "$target_path" ]]; then
-    local current_target
-    current_target="$(readlink "$target_path")"
-
-    if [[ "$current_target" != "$source_path" ]]; then
-      backup_path "$target_path"
-      ln -s "$source_path" "$target_path"
-    fi
-    return
-  fi
-
-  if [[ -e "$target_path" ]]; then
-    backup_path "$target_path"
-  fi
-
-  ln -s "$source_path" "$target_path"
 }
 
 require_command() {
@@ -72,80 +57,35 @@ require_command() {
   local message="$2"
 
   if ! command -v "$command_name" >/dev/null 2>&1; then
-    echo "$message" >&2
-    exit 1
+    die "$message"
   fi
 }
 
-disable_all_steps() {
-  RUN_PREFS=0
-  RUN_TOOLS=0
-  RUN_FONTS=0
-  RUN_ZSH=0
-  RUN_GHOSTTY=0
-}
+parse_packages() {
+  local package_csv="$1"
+  local raw_package
+  local package_name
+  local -a parsed_packages=()
 
-enable_step() {
-  local step_name="$1"
-
-  case "$step_name" in
-    prefs) RUN_PREFS=1 ;;
-    tools) RUN_TOOLS=1 ;;
-    fonts) RUN_FONTS=1 ;;
-    zsh) RUN_ZSH=1 ;;
-    ghostty) RUN_GHOSTTY=1 ;;
-    *)
-      echo "Unknown step: $step_name" >&2
-      usage >&2
-      exit 1
-      ;;
-  esac
-}
-
-disable_step() {
-  local step_name="$1"
-
-  case "$step_name" in
-    prefs) RUN_PREFS=0 ;;
-    tools) RUN_TOOLS=0 ;;
-    fonts) RUN_FONTS=0 ;;
-    zsh) RUN_ZSH=0 ;;
-    ghostty) RUN_GHOSTTY=0 ;;
-    *)
-      echo "Unknown step: $step_name" >&2
-      usage >&2
-      exit 1
-      ;;
-  esac
-}
-
-apply_step_list() {
-  local mode="$1"
-  local step_list="$2"
-  local step_name
-
-  IFS=',' read -r -a step_names <<<"$step_list"
-
-  for step_name in "${step_names[@]}"; do
-    case "$mode" in
-      only) enable_step "$step_name" ;;
-      skip) disable_step "$step_name" ;;
-    esac
+  for raw_package in "${(@s:,:)package_csv}"; do
+    package_name="${raw_package//[[:space:]]/}"
+    [[ -n "$package_name" ]] || die "--packages requires at least one non-empty package name."
+    parsed_packages+=("$package_name")
   done
+
+  STOW_PACKAGES=("${parsed_packages[@]}")
 }
 
 parse_args() {
-  while [[ $# -gt 0 ]]; do
+  while (( $# > 0 )); do
     case "$1" in
-      --only)
-        [[ $# -ge 2 ]] || { echo "--only requires a comma-separated step list." >&2; exit 1; }
-        disable_all_steps
-        apply_step_list "only" "$2"
-        shift 2
+      --stow-only)
+        STOW_ONLY=1
+        shift
         ;;
-      --skip)
-        [[ $# -ge 2 ]] || { echo "--skip requires a comma-separated step list." >&2; exit 1; }
-        apply_step_list "skip" "$2"
+      --packages)
+        (( $# >= 2 )) || die "--packages requires a comma-separated package list."
+        parse_packages "$2"
         shift 2
         ;;
       --help|-h)
@@ -153,9 +93,7 @@ parse_args() {
         exit 0
         ;;
       *)
-        echo "Unknown option: $1" >&2
-        usage >&2
-        exit 1
+        die "Unknown option: $1"
         ;;
     esac
   done
@@ -166,7 +104,7 @@ ensure_homebrew() {
     return
   fi
 
-  echo "Installing Homebrew..."
+  log_step "Installing Homebrew"
   NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 }
 
@@ -185,9 +123,16 @@ load_homebrew_env() {
     eval "$(/usr/local/bin/brew shellenv)"
     return
   fi
+}
 
-  echo "Homebrew is installed but could not be located." >&2
-  exit 1
+ensure_stow_available() {
+  if command -v stow >/dev/null 2>&1; then
+    return
+  fi
+
+  load_homebrew_env
+
+  require_command "stow" "GNU Stow is required for the stow step. Run the full bootstrap first or install stow manually."
 }
 
 install_font_archive() {
@@ -198,18 +143,18 @@ install_font_archive() {
   local temp_dir
   local archive_name
 
-  if compgen -G "$font_install_dir/$font_glob" >/dev/null; then
-    echo "$font_name already present in $font_install_dir"
+  if find "$font_install_dir" -maxdepth 1 -name "$font_glob" -print -quit 2>/dev/null | grep -q .; then
+    log_step "$font_name already present in $font_install_dir"
     return
   fi
 
   temp_dir="$(mktemp -d)"
   archive_name="$(basename "$font_url")"
 
-  echo "Downloading $font_name..."
+  log_step "Downloading $font_name"
   curl -fL "$font_url" -o "$temp_dir/$archive_name"
 
-  echo "Installing $font_name..."
+  log_step "Installing $font_name"
   mkdir -p "$font_install_dir"
   unzip -q "$temp_dir/$archive_name" -d "$temp_dir/extracted"
   find "$temp_dir/extracted" -type f -name '*.ttf' -exec cp {} "$font_install_dir/" \;
@@ -227,14 +172,13 @@ install_font_archives() {
   require_command "yq" "The fonts step requires yq. Install tools first or install yq manually."
 
   if [[ ! -f "$fonts_yaml_path" ]]; then
-    echo "Fonts config not found at $fonts_yaml_path" >&2
-    exit 1
+    die "Fonts config not found at $fonts_yaml_path"
   fi
 
   font_entries="$(yq -r '.fonts[] | [.name, .glob, .url] | @tsv' "$fonts_yaml_path")"
 
   if [[ -z "$font_entries" ]]; then
-    echo "No fonts defined in $fonts_yaml_path"
+    log_step "No fonts defined in $fonts_yaml_path"
     return
   fi
 
@@ -243,99 +187,98 @@ install_font_archives() {
   done <<<"$font_entries"
 }
 
-setup_zdotdir() {
-  local zdotdir_target="$HOME/.config/zsh"
-  local repo_zsh_dir="$BOOTSTRAP_DIR/zsh"
-  local zshenv_path="$HOME/.zshenv"
-  local desired_zshenv='export ZDOTDIR="$HOME/.config/zsh"'
-
-  mkdir -p "$HOME/.config"
-  ensure_symlink "$zdotdir_target" "$repo_zsh_dir"
-
-  if [[ -f "$zshenv_path" ]]; then
-    local current_zshenv_contents
-    current_zshenv_contents="$(<"$zshenv_path")"
-    if [[ "$current_zshenv_contents" != "$desired_zshenv" ]]; then
-      backup_path "$zshenv_path"
-      printf '%s\n' "$desired_zshenv" > "$zshenv_path"
-    fi
-  else
-    if [[ -e "$zshenv_path" ]]; then
-      backup_path "$zshenv_path"
-    fi
-    printf '%s\n' "$desired_zshenv" > "$zshenv_path"
-  fi
-}
-
 setup_antidote() {
   local antidote_dir="$HOME/.config/antidote"
 
   if [[ -d "$antidote_dir/.git" ]]; then
-    echo "Antidote already present at $antidote_dir"
+    log_step "Antidote already present at $antidote_dir"
     return
   fi
 
   if [[ -e "$antidote_dir" ]]; then
     backup_path "$antidote_dir"
   fi
+
+  log_step "Installing antidote"
   git clone --depth=1 https://github.com/mattmc3/antidote.git "$antidote_dir"
 }
 
-setup_ghostty() {
-  local ghostty_dir="$HOME/.config/ghostty"
-  local ghostty_config_target="$ghostty_dir/config"
-  local repo_ghostty_config="$BOOTSTRAP_DIR/ghostty/config"
+validate_stow_packages() {
+  local package_name
 
-  mkdir -p "$ghostty_dir"
-  ensure_symlink "$ghostty_config_target" "$repo_ghostty_config"
+  for package_name in "${STOW_PACKAGES[@]}"; do
+    [[ -d "$BOOTSTRAP_DIR/$package_name" ]] || die "Unknown stow package: $package_name"
+  done
+}
+
+backup_stow_conflicts() {
+  local package_name="$1"
+  local package_dir="$BOOTSTRAP_DIR/$package_name"
+  local source_path
+  local relative_path
+  local target_path
+
+  while IFS= read -r source_path; do
+    relative_path="${source_path#$package_dir/}"
+    target_path="$HOME/$relative_path"
+
+    if [[ -d "$source_path" && ! -L "$source_path" ]]; then
+      if [[ -e "$target_path" && ! -d "$target_path" ]]; then
+        backup_path "$target_path"
+      fi
+      continue
+    fi
+
+    if [[ -L "$target_path" && "${target_path:A}" == "${source_path:A}" ]]; then
+      continue
+    fi
+
+    if [[ -e "$target_path" || -L "$target_path" ]]; then
+      backup_path "$target_path"
+    fi
+  done < <(find "$package_dir" -mindepth 1 -print)
+}
+
+stow_packages() {
+  local package_name
+
+  ensure_stow_available
+  validate_stow_packages
+
+  for package_name in "${STOW_PACKAGES[@]}"; do
+    log_step "Preparing stow package: $package_name"
+    backup_stow_conflicts "$package_name"
+    log_step "Stowing package: $package_name"
+    stow --dir="$BOOTSTRAP_DIR" --target="$HOME" --restow "$package_name"
+  done
+}
+
+run_full_bootstrap() {
+  log_step "Configuring macOS key repeat settings"
+  defaults write -g InitialKeyRepeat -int 10
+  defaults write -g KeyRepeat -int 1
+
+  log_step "Ensuring Homebrew is installed"
+  ensure_homebrew
+  load_homebrew_env
+
+  log_step "Installing Homebrew packages from Brewfile"
+  brew bundle --file="$BOOTSTRAP_DIR/tools/Brewfile"
+
+  log_step "Ensuring configured fonts are installed"
+  install_font_archives
+
+  setup_antidote
+
+  stow_packages
 }
 
 parse_args "$@"
 
-# ⌨️ Configure macOS keyboard repeat settings so the shell environment
-# feels consistent on new machines without extra manual setup.
-if [[ "$RUN_PREFS" -eq 1 ]]; then
-  echo "⌨️ Configuring macOS key repeat settings..."
-  defaults write -g InitialKeyRepeat -int 10
-  defaults write -g KeyRepeat -int 1
+if (( STOW_ONLY )); then
+  stow_packages
+else
+  run_full_bootstrap
 fi
 
-# 🍺 Install Homebrew if it is missing, then load its environment into the
-# current shell so the rest of the script can use `brew` immediately.
-if [[ "$RUN_TOOLS" -eq 1 ]]; then
-  echo "🍺 Ensuring Homebrew is installed..."
-  ensure_homebrew
-  load_homebrew_env
-
-  # 📦 Install the repo-managed CLI/tooling set from a Brewfile. `brew bundle`
-  # safely ignores comments and keeps the package list declarative.
-  echo "📦 Installing Homebrew packages from Brewfile..."
-  brew bundle --file="$BOOTSTRAP_DIR/tools/brew"
-fi
-
-# 🔤 Install repo-managed font archives before wiring Ghostty so terminal
-# configs can reference fonts that already exist on the system.
-if [[ "$RUN_FONTS" -eq 1 ]]; then
-  echo "🔤 Ensuring configured fonts are installed..."
-  install_font_archives
-fi
-
-# 🏠 Point zsh at the repo-managed config by wiring `~/.config/zsh` to the
-# checked-out `zsh/` directory and ensuring `~/.zshenv` exports `ZDOTDIR`.
-if [[ "$RUN_ZSH" -eq 1 ]]; then
-  echo "🏠 Setting up ZDOTDIR..."
-  setup_zdotdir
-
-  # 🧪 Install antidote in a stable XDG-style config location so the zsh config
-  # can source it consistently across machines.
-  echo "🧪 Installing antidote plugin manager..."
-  setup_antidote
-fi
-
-# 👻 Point Ghostty at the repo-managed config using its XDG config path.
-if [[ "$RUN_GHOSTTY" -eq 1 ]]; then
-  echo "👻 Setting up Ghostty config..."
-  setup_ghostty
-fi
-
-echo "✅ Bootstrap complete."
+log_step "Bootstrap complete"

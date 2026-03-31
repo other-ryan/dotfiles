@@ -1,4 +1,5 @@
 mattmc3/ez-compinit
+romkatv/zsh-defer
 mattmc3/zephyr path:plugins/color
 mattmc3/zephyr path:plugins/prompt
 mattmc3/zephyr path:plugins/helper  # provides cached-eval() (replaces mroth/evalcache)

@@ -12,7 +12,6 @@ if [[ ${ZSH_PROMPT_USE} == starship ]]; then
   # print (${VENV_NAME}) at every prompt
   export VIRTUAL_ENV_DISABLE_PROMPT=1
   export STARSHIP_LOG=error
-  export _ZSH_THEME=$ZSH_PROMPT_THEME
   zstyle ':zephyr:plugin:prompt' theme starship ${ZSH_PROMPT_THEME}
 fi
 # 🚀 end

@@ -1,5 +1,7 @@
 # pre.zsh
 #
+# to use, copy this template to ${HOME}/.zsh_pre
+#
 # configs here are loaded before anything else. use this to override
 # any local dev sources as needed. this file is ignored from git.
 # examples:

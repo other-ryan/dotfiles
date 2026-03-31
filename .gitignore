@@ -1,5 +1,3 @@
 .DS_Store
 .localized
 zsh/.zsh_plugins.zsh
-zsh/.config/zsh/.post.zsh
-zsh/.config/zsh/.pre.zsh

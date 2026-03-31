@@ -1,4 +1,6 @@
-# post.zsh
+# .zsh_post
+#
+# to use, copy this template to ${HOME}/.zsh_post
 #
 # configs here are loaded after everything else. use this to override
 # any local dev sources as needed. this file is ignored from git.

@@ -45,11 +45,11 @@ EOF
 }
 
 backup_path() {
-  local path="$1"
-  local backup="${path}.bak.$(timestamp)"
+  local target_path="$1"
+  local backup="${target_path}.bak.$(timestamp)"
 
-  log_warn "Backing up $path to $backup"
-  mv "$path" "$backup"
+  log_warn "Backing up $target_path to $backup"
+  mv "$target_path" "$backup"
 }
 
 require_command() {
@@ -229,7 +229,7 @@ backup_stow_conflicts() {
       continue
     fi
 
-    if [[ -L "$target_path" && "${target_path:A}" == "${source_path:A}" ]]; then
+    if [[ ( -e "$target_path" || -L "$target_path" ) && "$target_path" -ef "$source_path" ]]; then
       continue
     fi
 
@@ -249,7 +249,7 @@ stow_packages() {
     log_step "Preparing stow package: $package_name"
     backup_stow_conflicts "$package_name"
     log_step "Stowing package: $package_name"
-    stow --dir="$BOOTSTRAP_DIR" --target="$HOME" --restow "$package_name"
+    stow --dir="$BOOTSTRAP_DIR" --target="$HOME" --restow --no-folding "$package_name"
   done
 }
 

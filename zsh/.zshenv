@@ -1,1 +1,3 @@
-export ZDOTDIR="$HOME/.config/zsh"
+if [[ "${OSTYPE:-}" == darwin* ]]; then
+  export ZDOTDIR="$HOME/.config/zsh"
+fi

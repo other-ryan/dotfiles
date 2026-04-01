@@ -5,7 +5,7 @@
 add_newline = false
 
 # A minimal left prompt
-format = """$directory$character"""
+format = """($os )$directory$character"""
 #format = """$python$directory($status$cmd_duration)($git_branch${custom.git_status_dirty}$git_status )$character"""
 
 # move the rest of the prompt to the right
@@ -76,6 +76,31 @@ fish_style_pwd_dir_length = 1
 format = '$symbol [$branch]($style)'
 style = 'green'
 symbol = ''
+
+[os]
+disabled = false
+
+[os.symbols]
+Windows = ""
+Ubuntu = "󰕈"
+SUSE = ""
+Raspbian = "󰐿"
+Mint = "󰣭"
+Macos = "󰀵"
+Manjaro = ""
+Linux = "󰌽"
+Gentoo = "󰣨"
+Fedora = "󰣛"
+Alpine = ""
+Amazon = ""
+Android = ""
+AOSC = ""
+Arch = "󰣇"
+Artix = "󰣇"
+CentOS = ""
+Debian = "󰣚"
+Redhat = "󱄛"
+RedHatEnterprise = "󱄛"
 
 [git_status]
 format = '( [\[$ahead_behind$stashed\]]($style))'

@@ -47,12 +47,13 @@
 # # which is explained in the docs for that config option.
 # # Just for example:
 # resize-overlay-duration = 4s 200ms
-shell-integration-features = no-cursor
+shell-integration-features = no-cursor,ssh-terminfo,ssh-env
 cursor-style = block
 cursor-style-blink = false
 font-family = Mononoki Nerd Font
 theme = Zenwritten Dark
 window-inherit-working-directory = false
+
 
 # use config-local (relative to this file) to add additional
 # machine-specific settings

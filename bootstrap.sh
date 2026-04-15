@@ -4,7 +4,7 @@ set -euo pipefail
 
 BOOTSTRAP_DIR="${0:A:h}"
 STOW_ONLY=0
-typeset -a STOW_PACKAGES=(zsh ghostty git)
+typeset -a STOW_PACKAGES=(zsh ghostty git raycast)
 
 log_step() {
   print -P "%F{cyan}==>%f $*"

@@ -2,7 +2,7 @@
 
 # Required parameters: repo
 # @raycast.schemaVersion 1
-# @raycast.title sourcegraph repo
+# @raycast.title sourcegraph public repo
 # @raycast.mode silent
 
 # Optional parameters:

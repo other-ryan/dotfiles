@@ -2,9 +2,11 @@
 cask "codex"
 cask "ghostty"
 
+brew "bat"
 brew "curl"
 brew "ffmpeg"
 brew "gh"
+brew "git-delta"
 brew "go"
 brew "hstr"
 brew "htop"

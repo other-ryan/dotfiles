@@ -1,4 +1,6 @@
 # 📜 histr setup
+setopt HIST_IGNORE_ALL_DUPS
+
 export HISTFILE=~/.zsh_history
-SAVEHIST=500000
-HISTSIZE=500000
+export SAVEHIST=500000
+export HISTSIZE=500000

@@ -1,0 +1,7 @@
+interface:
+  display_name: "Branch Walkthrough"
+  short_description: "Guided, read-only walkthrough of branch changes"
+  default_prompt: "Use $branch-walkthrough to explain the current branch one logical change at a time."
+
+policy:
+  allow_implicit_invocation: false

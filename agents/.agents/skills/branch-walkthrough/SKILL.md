@@ -53,6 +53,7 @@ Present a short opening containing:
 - Branch goal and major themes
 - File count and compact change summary
 - Proposed walkthrough order
+- Diff convention: each textual unit begins with a compact, focused patch
 - Any excluded uncommitted work or files receiving mechanical treatment
 
 Pause for approval. Let the user reorder, prioritize, or exclude sections before beginning.
@@ -61,16 +62,24 @@ Pause for approval. Let the user reorder, prioritize, or exclude sections before
 
 Within each source file, combine related hunks into one logical change and split independent behavior changes. Cover every meaningful file; do not combine unrelated source files merely to save tokens.
 
-For each unit, explain at high-to-medium level:
+For each textual source-file unit, first show a compact visual anchor before the explanation:
+
+- Label it `**Focused diff — <repo-relative path> · <nearest symbol or concise section label>**`.
+- Render a fenced `diff` block containing only the final-net-diff hunk or hunks assigned to that unit. Preserve the `diff --git`, file, and `@@` hunk headers.
+- Include all assigned hunks in source order. Keep at most three unchanged context lines around changed lines; let the hunk headers orient the reader instead of adding manual line-number gutters.
+- Use standard Markdown `diff` fences so supporting clients can syntax-highlight additions and removals. Do not emit ANSI colors, HTML/CSS, images, tables, or artificial line-number columns.
+- When a narrated theme crosses files, render separately labeled focused patches for each file. Do not use a patch to combine unrelated files.
+
+Then explain the unit at high-to-medium level:
 
 - **Role:** What the file or component contributes, stated only on its first unit
 - **What:** The observable behavior or contract that changed
 - **How:** The important data flow, control flow, or relationship that implements it
 - **Why:** How the change supports the established branch goal and why it belongs here
 
-Use headings or bullets only when they improve scanning. Omit empty labels. Do not paste the diff, paraphrase line by line, repeat unchanged context, or include code excerpts unless a short excerpt is necessary or requested. Explain tests in terms of behavior guaranteed rather than every assertion.
+Use headings or bullets only when they improve scanning. Omit empty labels. Do not paste a branch-wide or whole-file diff by default, paraphrase the patch line by line, or repeat unchanged context. The focused patch supplements rather than replaces the behavioral explanation. Explain tests in terms of behavior guaranteed rather than every assertion.
 
-For generated, vendored, lock, snapshot, or other mechanical files, account for each file but summarize the meaningful effect and connect it to the originating source change. Expand only on request. Summarize renames, deletions, and binaries by their effect.
+For generated, vendored, lock, snapshot, or other mechanical files, account for each file but summarize the meaningful effect and connect it to the originating source change. For renames, deletions, binaries, and non-textual changes, show accurate diff metadata such as status, similarity, or binary-change information instead of fabricating a textual patch. Expand printable diffs only on request.
 
 End every logical unit with: `Questions, feedback, or continue?`
 
@@ -78,6 +87,7 @@ Do not advance until the user explicitly continues. Interpret natural-language r
 
 - Continue to the next unit
 - Go deeper on the current explanation
+- Show more context around the current patch or the full current-file diff
 - Skip or revisit a unit
 - Change the remaining order
 - Stop and save a portable checkpoint

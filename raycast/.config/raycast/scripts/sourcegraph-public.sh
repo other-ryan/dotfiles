@@ -6,7 +6,7 @@
 # @raycast.mode silent
 
 # Optional parameters:
-# @raycast.icon icons/sourcegraph.svg
+# @raycast.icon icons/sourcegraph.png
 # @raycast.argument1 { "type": "text", "placeholder": "repo" }
 # @raycast.argument2 { "type": "text", "placeholder": "query", "optional": true }
 # @raycast.packageName sourcegraph-public

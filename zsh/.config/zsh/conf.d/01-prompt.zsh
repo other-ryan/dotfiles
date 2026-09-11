@@ -1,4 +1,5 @@
 # 💾 prompt configs
+
 typeset -g ZSH_PROMPT_USE=starship
 typeset -g ZSH_PROMPT_THEME=starship
 zstyle -s ':rm:zsh:zephyr:prompt' use ZSH_PROMPT_USE

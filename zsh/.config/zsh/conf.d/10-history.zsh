@@ -1,4 +1,5 @@
 # 📜 histr setup
+
 setopt HIST_IGNORE_ALL_DUPS
 
 export HISTFILE=~/.zsh_history

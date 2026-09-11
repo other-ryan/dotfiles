@@ -34,7 +34,7 @@ urlencode() {
 }
 
 if [ -z "$2" ]; then
-  URL="https://sourcegraph.com/search?q=context%3Aglobal+repo%3A${1}&patternType=keyword&sm=0&df=%5B%22type%22%2C%22Repositories%22%2C%22type%3Arepo%22%5D&__cc=1"
+    URL="https://sourcegraph.com/search?q=context%3Aglobal+repo%3A${1}&patternType=keyword&sm=0&df=%5B%22type%22%2C%22Repositories%22%2C%22type%3Arepo%22%5D&__cc=1"
 else
     ENCODED_QUERY=$(urlencode "$2")
     REGEX_SEARCH_URL='https://sourcegraph.com/search?patternType=regexp&q=context%3Aglobal+repo:'

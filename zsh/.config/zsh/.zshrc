@@ -5,9 +5,9 @@ fi
 
 # source main configs
 if [[ -d "${ZDOTDIR}/conf.d" ]]; then
-  for f in "${ZDOTDIR}/conf.d/"*.zsh(N); do
-    source "$f"
-  done
+    for f in "${ZDOTDIR}/conf.d/"*.zsh(N); do
+        source "$f"
+    done
 fi
 
 # source post configs

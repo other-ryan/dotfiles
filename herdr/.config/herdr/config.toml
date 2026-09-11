@@ -12,4 +12,10 @@ next_agent = "prefix+tab"
 agent_panel_sort = "spaces"
 
 [experimental]
-pane_history = false
+pane_history = true
+
+[[keys.command]]
+key = "prefix+/"
+type = "shell"
+command = "herdr pane split $HERDR_ACTIVE_PANE_ID --direction right --no-focus && sleep 0.1 && herdr pane split $HERDR_ACTIVE_PANE_ID --direction down --no-focus"
+description = "Generate 3-pane left-split layout on active tab"
